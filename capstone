@@ -1,0 +1,42 @@
+int Relay=3;
+volatile int flow_frequency; // Measures flow sensor pulses
+float vol = 0.0,l_minute;
+unsigned char flowsensor = 2; // Sensor Input
+unsigned long currentTime;
+unsigned long cloopTime;
+void flow () 
+{flow_frequency++;}
+void setup(){
+  pinMode (Relay,OUTPUT);
+   pinMode(flowsensor, INPUT);
+   digitalWrite(flowsensor, HIGH); // Optional Internal Pull-Up
+   Serial.begin(9600);
+   attachInterrupt(digitalPinToInterrupt(flowsensor), flow, RISING); // Setup Interrupt
+   currentTime = millis();
+   cloopTime = currentTime;  
+
+ }
+void loop(){
+int buttonState = digitalRead(4);
+
+  if (buttonState == LOW) {
+    digitalWrite (Relay,LOW); }
+else{
+    digitalWrite (Relay,HIGH);  } 
+
+ 
+currentTime = millis();
+   if(currentTime >= (cloopTime + 1000))
+   {
+    cloopTime = currentTime; // Updates cloopTime
+    if(flow_frequency != 0){
+      l_minute = (flow_frequency / 7.5); // (Pulse frequency x 60 min) / 7.5Q = flowrate in L/hour
+      l_minute = l_minute/60;
+      vol = vol +l_minute;
+      flow_frequency = 0; // Reset Counter
+      Serial.print("Flow Rate="); // Print litres/hour
+      Serial.print(l_minute, DEC); // Print litres/hour
+      Serial.println(" L/Sec");
+ delay(1000);
+
+}}}
